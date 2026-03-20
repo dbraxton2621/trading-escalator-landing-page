@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Escalator — Never Miss a Trade Signal Again</title>
+<meta name="description" content="Alarms that escalate until you act. Push, SMS, call — whatever it takes. Built by a trader who got tired of missing moves.">
+<link rel="icon" type="image/png" href="logomark.png">
+<link rel="apple-touch-icon" href="logomark.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --bg-primary: #0a0e17; --bg-secondary: #111827; --bg-card: #1a2235; --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b; --accent: #00D4FF; --accent-green: #00FF88; --accent-glow: rgba(0,212,255,0.15); --border: rgba(255,255,255,0.06); --radius: 16px; }
+body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; overflow-x: hidden; }
+.container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+section { position: relative; z-index: 1; }
+#three-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,14,23,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 16px 0; }
+nav .container { display: flex; align-items: center; justify-content: space-between; }
+.logo-nav { display: flex; align-items: center; gap: 10px; }
+.logo-nav img { height: 32px; }
+.logo-nav span { font-weight: 800; font-size: 1.1rem; }
+.logo-nav .accent { color: var(--accent); }
+.nav-cta { background: var(--accent); color: var(--bg-primary); padding: 10px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,212,255,0.3); }
+
+.hero { min-height: 100vh; display: flex; align-items: center; padding: 120px 0 80px; }
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-glow); border: 1px solid rgba(0,212,255,0.2); padding: 8px 16px; border-radius: 100px; font-size: 0.85rem; color: var(--accent); font-weight: 500; margin-bottom: 24px; }
+.hero h1 { font-size: clamp(2.5rem,5vw,3.8rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px; }
+.hero h1 .accent { color: var(--accent); }
+.hero .sub { font-size: 1.2rem; color: var(--text-secondary); max-width: 480px; margin-bottom: 36px; line-height: 1.7; }
+.hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+.btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: var(--bg-primary); padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.05rem; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s; animation: pulse-glow 3s ease-in-out infinite; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.35); }
+@keyframes pulse-glow { 0%,100% { box-shadow: 0 0 20px rgba(0,212,255,0.1); } 50% { box-shadow: 0 0 30px rgba(0,212,255,0.25); } }
+.btn-secondary { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--text-primary); padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 1.05rem; text-decoration: none; border: 1px solid rgba(255,255,255,0.15); transition: all 0.2s; }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.social-proof-strip { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 0.9rem; }
+.social-proof-strip i { color: var(--accent-green); }
+
+.phone-mockup { display: flex; justify-content: center; }
+.phone-frame { width: 280px; border-radius: 40px; overflow: hidden; border: 3px solid #2a2a4a; box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,212,255,0.05); animation: phone-float 4s ease-in-out infinite; }
+.phone-frame img { width: 100%; display: block; }
+@keyframes phone-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+.section-label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px; }
+.section-title { font-size: clamp(1.8rem,3.5vw,2.6rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 24px; }
+
+.problem { padding: 120px 0; }
+.problem-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+.problem p { font-size: 1.15rem; color: var(--text-secondary); line-height: 1.8; }
+.highlight { color: var(--text-primary); font-weight: 600; }
+
+.features { padding: 80px 0 120px; }
+.feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; margin-bottom: 100px; }
+.feature-row.reverse { direction: rtl; }
+.feature-row.reverse > * { direction: ltr; }
+.feature-tag { display: inline-block; font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
+.feature-text h3 { font-size: 1.8rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.02em; }
+.feature-text p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.8; }
+.feature-phone { display: flex; justify-content: center; }
+.feature-phone .phone-frame { width: 240px; animation: none; }
+
+.stats { padding: 80px 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+.stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; text-align: center; }
+.stat-num { font-size: 2.2rem; font-weight: 900; color: var(--accent); margin-bottom: 4px; }
+.stat-label { font-size: 0.85rem; color: var(--text-secondary); }
+
+.testimonials { padding: 100px 0; }
+.test-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.test-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+.test-card .stars { color: #ffc832; font-size: 0.85rem; margin-bottom: 12px; }
+.test-card p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+.test-card .author { font-size: 0.85rem; font-weight: 600; }
+.test-card .author span { color: var(--text-muted); font-weight: 400; }
+
+.faq { padding: 100px 0; }
+.faq-list { max-width: 720px; margin: 0 auto; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-question { width: 100%; background: none; border: none; color: var(--text-primary); font-family: inherit; font-size: 1.05rem; font-weight: 600; padding: 24px 0; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.faq-question i { color: var(--accent); transition: transform 0.3s; font-size: 0.85rem; }
+.faq-question.active i { transform: rotate(45deg); }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.faq-answer p { padding-bottom: 24px; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8; }
+
+.final-cta { padding: 120px 0; text-align: center; }
+.final-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%); pointer-events: none; }
+.final-cta h2 { font-size: clamp(2rem,4vw,3rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 16px; }
+.final-cta p.cta-sub { font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 40px; }
+.final-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+.waitlist-form { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+.waitlist-form input { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; color: var(--text-primary); font-family: inherit; font-size: 1rem; width: 300px; outline: none; }
+.waitlist-form input:focus { border-color: var(--accent); }
+.waitlist-form input::placeholder { color: var(--text-muted); }
+.store-badges { display: flex; gap: 16px; justify-content: center; opacity: 0.4; }
+.store-badge { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 24px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+.coming-soon { font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; }
+
+footer { padding: 40px 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+footer a { color: var(--text-secondary); text-decoration: none; }
+footer a:hover { color: var(--accent); }
+
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+  .hero .sub { margin: 0 auto 36px; }
+  .hero-ctas { justify-content: center; }
+  .social-proof-strip { justify-content: center; }
+  .feature-row, .feature-row.reverse { grid-template-columns: 1fr; gap: 40px; direction: ltr; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .test-grid { grid-template-columns: 1fr; }
+  .phone-frame { width: 220px; }
+  .feature-phone .phone-frame { width: 200px; }
+  .store-badges { flex-direction: column; align-items: center; }
+  .waitlist-form { flex-direction: column; align-items: center; }
+  .waitlist-form input { width: 100%; }
+}
+</style>
+</head>
+<body>
+<canvas id="three-bg"></canvas>
+
+<nav>
+  <div class="container">
+    <div class="logo-nav">
+      <img src="logomark.png" alt="Trade Escalator">
+      <span>Trade <span class="accent">Escalator</span></span>
+    </div>
+    <a href="#early-access" class="nav-cta">Get Early Access — $5</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge"><i class="fas fa-bolt"></i> Built by a trader, for traders</div>
+        <h1>Never Miss a <span class="accent">Trade Signal</span> Again</h1>
+        <p class="sub">Alerts that escalate until you act — push, SMS, call. Track every signal, set custom rules, and never let a notification get buried again.</p>
+        <div class="hero-ctas">
+          <a href="#early-access" class="btn-primary"><i class="fas fa-rocket"></i> Become an Early Adopter — $5</a>
+          <a href="#waitlist" class="btn-secondary"><i class="fas fa-envelope"></i> Join the Waitlist</a>
+        </div>
+        <div class="social-proof-strip"><i class="fas fa-shield-halved"></i><span>Lifetime discount at launch for early adopters</span></div>
+      </div>
+      <div class="phone-mockup">
+        <div class="phone-frame"><img src="screen-alerts.png" alt="Trade Escalator Alerts"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="problem">
+  <div class="container">
+    <div class="problem-inner fade-in">
+      <div class="section-label"><i class="fas fa-triangle-exclamation"></i> The Problem</div>
+      <h2 class="section-title">You set a price alert. Your phone buzzed <span style="color:var(--accent)">once</span>.</h2>
+      <p>You were in a meeting. Or driving. Or sleeping. By the time you checked, <span class="highlight">the move was over</span>. The alert did its job — it fired once. But once wasn't enough.</p>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="container">
+    <div class="section-label" style="text-align:center;display:block"><i class="fas fa-sparkles"></i> How It Works</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:80px">Real alerts. Real escalation. <span style="color:var(--accent)">Real results.</span></h2>
+
+    <div class="feature-row fade-in">
+      <div class="feature-text">
+        <div class="feature-tag">Command Center</div>
+        <h3>Every Signal, One Dashboard</h3>
+        <p>GC, NQ, MSFT, ES — all your alerts in one place. See tier levels (Warning, High, Critical, Info), delivery status, and escalation counts at a glance. Filter by amplified, unacknowledged, or acknowledged.</p>
+      </div>
+      <div class="feature-phone"><div class="phone-frame"><img src="screen-alerts.png" alt="Alerts Dashboard"></div></div>
+    </div>
+
+    <div class="feature-row reverse fade-in">
+      <div class="feature-text">
+        <div class="feature-tag">Smart Rules</div>
+        <h3>Custom Rules for Every Scenario</h3>
+        <p>Wake you for GC overnight. Amplify NQ pre-market. Keep info signals quiet. Match by symbol, timeframe, tier, direction, and session window. Start with templates or build your own.</p>
+      </div>
+      <div class="feature-phone"><div class="phone-frame"><img src="screen-rules.png" alt="Custom Rules"></div></div>
+    </div>
+
+    <div class="feature-row fade-in">
+      <div class="feature-text">
+        <div class="feature-tag">Analytics</div>
+        <h3>Know Your Response Rate</h3>
+        <p>85.2% ack rate. 3 minute median response time. 54 total alerts tracked. See exactly how you perform — alerts by symbol, escalation counts, and response trends over 30 days.</p>
+      </div>
+      <div class="feature-phone"><div class="phone-frame"><img src="screen-analytics.png" alt="Analytics"></div></div>
+    </div>
+
+    <div class="feature-row reverse fade-in">
+      <div class="feature-text">
+        <div class="feature-tag">Integrations</div>
+        <h3>Connects to Your Stack</h3>
+        <p>Deep link to thinkorswim charts from any alert. Webhook acknowledgments to Discord, Slack, or custom endpoints. Quiet hours that respect your sleep — unless your rules say otherwise.</p>
+      </div>
+      <div class="feature-phone"><div class="phone-frame"><img src="screen-settings.png" alt="Settings"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid fade-in">
+      <div class="stat-card"><div class="stat-num">85.2%</div><div class="stat-label">Ack Rate</div></div>
+      <div class="stat-card"><div class="stat-num">3m 0s</div><div class="stat-label">Median Response</div></div>
+      <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Escalation Channels</div></div>
+      <div class="stat-card"><div class="stat-num">24/7</div><div class="stat-label">Alert Monitoring</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="container">
+    <div class="section-label" style="text-align:center;display:block"><i class="fas fa-users"></i> Early Adopters</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:60px">Traders who stopped missing signals</h2>
+    <div class="test-grid fade-in">
+      <div class="test-card">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p>"I missed a $2,400 swing trade because my alert buzzed once while I was driving. Trade Escalator would have called me. Never again."</p>
+        <div class="author">Day trader <span>· Options & Equities</span></div>
+      </div>
+      <div class="test-card">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p>"The analytics page alone is worth it. I had no idea I was only catching 40% of my alerts. Now I'm at 85%+ and actually catching my setups."</p>
+        <div class="author">Swing trader <span>· 8 years experience</span></div>
+      </div>
+      <div class="test-card">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p>"The thinkorswim deep link is genius. Alert fires, I acknowledge, and I'm looking at the chart in under 5 seconds. Seamless."</p>
+        <div class="author">Futures trader <span>· GC & NQ</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="container">
+    <div class="section-label" style="text-align:center;display:block"><i class="fas fa-circle-question"></i> FAQ</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:48px">Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item fade-in"><button class="faq-question">How does escalation work? <i class="fas fa-plus"></i></button><div class="faq-answer"><p>When a signal comes in, Trade Escalator delivers it as a push notification. If you don't acknowledge within your configured window, it escalates — SMS, then phone call, then any additional channels you've set up. The chain keeps going until you tap acknowledge.</p></div></div>
+      <div class="faq-item fade-in"><button class="faq-question">What brokers and platforms does it connect to? <i class="fas fa-plus"></i></button><div class="faq-answer"><p>Trade Escalator supports broker deep links (thinkorswim, etc.) so you can jump straight to the chart from any alert. It also supports Discord, Slack, and custom webhook endpoints for acknowledgment notifications.</p></div></div>
+      <div class="faq-item fade-in"><button class="faq-question">What are the notification tiers? <i class="fas fa-plus"></i></button><div class="faq-answer"><p>Alerts come in four tiers: Info (quiet), Warning (standard), High (urgent), and Critical (maximum escalation). You set rules that match signals to tiers based on symbol, timeframe, direction, and session window.</p></div></div>
+      <div class="faq-item fade-in"><button class="faq-question">Can I set quiet hours? <i class="fas fa-plus"></i></button><div class="faq-answer"><p>Yes. Set a quiet hours window in Settings. Normal notifications are suppressed. But rules with "Override Quiet Hours" enabled will still ring through — perfect for overnight GC or NQ alerts.</p></div></div>
+      <div class="faq-item fade-in"><button class="faq-question">How do I cancel? <i class="fas fa-plus"></i></button><div class="faq-answer"><p>Settings → Subscription → Cancel. One tap. No hoops. Early adopters lock in a lifetime discount — you can cancel and re-subscribe at the same rate anytime.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta" id="early-access">
+  <div class="container">
+    <h2 class="fade-in">Stop missing trades.<br><span style="color:var(--accent)">Start catching them.</span></h2>
+    <p class="cta-sub fade-in">Early adopters get lifetime discounted pricing. $5 reserves your spot.</p>
+    <div class="final-ctas fade-in"><a href="#stripe-placeholder" class="btn-primary"><i class="fas fa-rocket"></i> Become an Early Adopter — $5</a></div>
+    <form class="waitlist-form fade-in" id="waitlist" onsubmit="event.preventDefault();this.querySelector('button').textContent='You\'re on the list!';this.querySelector('button').style.background='var(--accent-green)';"><input type="email" placeholder="Enter your email for the free waitlist" required><button type="submit" class="btn-secondary" style="border-color:var(--accent);cursor:pointer">Join Waitlist</button></form>
+    <div class="store-badges fade-in"><div class="store-badge"><i class="fab fa-apple"></i> App Store</div><div class="store-badge"><i class="fab fa-google-play"></i> Google Play</div></div>
+    <div class="coming-soon fade-in">Coming Soon to iOS & Android</div>
+  </div>
+</section>
+
+<footer><div class="container"><p>&copy; 2026 Trade Escalator. Built by a trader who got tired of missing moves.</p><p style="margin-top:8px"><a href="mailto:support@tradingescalator.com">support@tradingescalator.com</a> · <a href="#faq">FAQ</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p></div></footer>
+
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+document.querySelectorAll('.faq-question').forEach(b=>{b.addEventListener('click',()=>{const a=b.nextElementSibling,o=b.classList.contains('active');document.querySelectorAll('.faq-question').forEach(x=>{x.classList.remove('active');x.nextElementSibling.style.maxHeight=null});if(!o){b.classList.add('active');a.style.maxHeight=a.scrollHeight+'px'}})});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'})})});
+(function(){const c=document.getElementById('three-bg'),s=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1e3),r=new THREE.WebGLRenderer({canvas:c,antialias:!0,alpha:!0});r.setSize(innerWidth,innerHeight);r.setPixelRatio(Math.min(devicePixelRatio,2));const N=250,p=new Float32Array(N*3),v=[];for(let i=0;i<N;i++){p[i*3]=(Math.random()-.5)*40;p[i*3+1]=(Math.random()-.5)*40;p[i*3+2]=(Math.random()-.5)*20-5;v.push({x:(Math.random()-.5)*.005,y:(Math.random()-.5)*.005})}const g=new THREE.BufferGeometry;g.setAttribute('position',new THREE.BufferAttribute(p,3));s.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x00D4FF,size:.06,transparent:!0,opacity:.35})));const lp=[];for(let i=0;i<35;i++){const x=(Math.random()-.5)*30,y=(Math.random()-.5)*30,z=-8-Math.random()*8;lp.push(x,y,z,x+(Math.random()-.5)*6,y+(Math.random()-.5)*6,z+(Math.random()-.5)*3)}const lg=new THREE.BufferGeometry;lg.setAttribute('position',new THREE.Float32BufferAttribute(lp,3));s.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0x00D4FF,transparent:!0,opacity:.04})));cam.position.z=8;let mx=0,my=0;document.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2});let so=1;addEventListener('scroll',()=>{so=Math.max(0,1-scrollY/(innerHeight*.8));c.style.opacity=so});function a(){requestAnimationFrame(a);const pos=g.attributes.position.array;for(let i=0;i<N;i++){pos[i*3]+=v[i].x;pos[i*3+1]+=v[i].y;if(Math.abs(pos[i*3])>20)v[i].x*=-1;if(Math.abs(pos[i*3+1])>20)v[i].y*=-1}g.attributes.position.needsUpdate=!0;cam.position.x+=(mx*.5-cam.position.x)*.02;cam.position.y+=(-my*.3-cam.position.y)*.02;cam.lookAt(0,0,0);if(so>.01)r.render(s,cam)}a();addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight)})})();
+</script>
+</body>
+</html>
