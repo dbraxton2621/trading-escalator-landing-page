@@ -264,7 +264,7 @@ footer a:hover { color: var(--accent); }
     <h2 class="fade-in">Stop missing trades.<br><span style="color:var(--accent)">Start catching them.</span></h2>
     <p class="cta-sub fade-in">Early adopters get lifetime discounted pricing. $5 reserves your spot.</p>
     <div class="final-ctas fade-in"><a href="https://buy.stripe.com/test_dRm4gygHredo3pR4bz5ZC00" class="btn-primary"><i class="fas fa-rocket"></i> Become an Early Adopter — $5</a></div>
-    <form class="waitlist-form fade-in" id="waitlist" onsubmit="event.preventDefault();this.querySelector('button').textContent='You\'re on the list!';this.querySelector('button').style.background='var(--accent-green)';"><input type="email" placeholder="Enter your email for the free waitlist" required><button type="submit" class="btn-secondary" style="border-color:var(--accent);cursor:pointer">Join Waitlist</button></form>
+    <form class="waitlist-form fade-in" id="waitlist" onsubmit="handleWaitlist(event)"><input type="email" id="waitlist-email" placeholder="Enter your email for the free waitlist" required><button type="submit" id="waitlist-btn" class="btn-secondary" style="border-color:var(--accent);cursor:pointer">Join Waitlist</button></form>
     <div class="store-badges fade-in"><div class="store-badge"><i class="fab fa-apple"></i> App Store</div><div class="store-badge"><i class="fab fa-google-play"></i> Google Play</div></div>
     <div class="coming-soon fade-in">Coming Soon to iOS & Android</div>
   </div>
@@ -273,6 +273,52 @@ footer a:hover { color: var(--accent); }
 <footer><div class="container"><p>&copy; 2026 Trade Escalator. Built by a trader who got tired of missing moves.</p><p style="margin-top:8px"><a href="mailto:support@tradingescalator.com">support@tradingescalator.com</a> · <a href="#faq">FAQ</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p></div></footer>
 
 <script>
+// Waitlist — saves to Supabase
+const SUPABASE_URL = 'https://qqrquiadmcyefvknoyhb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxcnF1aWFkbWN5ZWZ2a25veWhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3OTY2OTYsImV4cCI6MjA4OTM3MjY5Nn0.-f6kl3Fc_y8K2szaC7fWkM20dEvCBW-t2fNGjtZto3s';
+
+async function handleWaitlist(e) {
+  e.preventDefault();
+  const email = document.getElementById('waitlist-email').value.trim();
+  const btn = document.getElementById('waitlist-btn');
+  if (!email) return;
+
+  btn.textContent = 'Joining...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/waitlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ email: email, source: 'landing_page' })
+    });
+
+    if (res.ok) {
+      btn.textContent = "You're on the list!";
+      btn.style.background = '#00FF88';
+      btn.style.color = '#0a0e17';
+      btn.style.borderColor = '#00FF88';
+      document.getElementById('waitlist-email').value = '';
+    } else if (res.status === 409) {
+      btn.textContent = "You're already on the list!";
+      btn.style.background = '#00D4FF';
+      btn.style.color = '#0a0e17';
+      btn.style.borderColor = '#00D4FF';
+    } else {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+  }
+}
+
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
 document.querySelectorAll('.faq-question').forEach(b=>{b.addEventListener('click',()=>{const a=b.nextElementSibling,o=b.classList.contains('active');document.querySelectorAll('.faq-question').forEach(x=>{x.classList.remove('active');x.nextElementSibling.style.maxHeight=null});if(!o){b.classList.add('active');a.style.maxHeight=a.scrollHeight+'px'}})});
 document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'})})});
